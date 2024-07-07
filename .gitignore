@@ -134,3 +134,4 @@ config.json
 .turbo
 
 app/fronted/build/
+app/backend/build/
