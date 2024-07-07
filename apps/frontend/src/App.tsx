@@ -1,8 +1,10 @@
 import {useEffect, useState} from 'react';
 import './App.css';
 
+const API_URL = `http://127.0.0.1:${import.meta.env.VITE_API_PORT}/${import.meta.env.VITE_API_PREFIX}`;
+
 const launchKvmByName = async (name: string) => {
-  fetch(`http://127.0.0.1:5000/api/${name}`)
+  fetch(`${API_URL}/${name}`)
 };
 
 function App() {
@@ -10,7 +12,7 @@ function App() {
 
   useEffect(() => {
     const getNames = async () => {
-      const response = await fetch('http://127.0.0.1:5000/api/');
+      const response = await fetch(`${API_URL}/`);
       const responseJson = await response.json();
       if (!responseJson) {
         return null;
