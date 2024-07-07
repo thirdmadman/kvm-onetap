@@ -13,9 +13,9 @@ export async function rootRoutes(server: FastifyInstance) {
       return reply.send(500);
     }
   });
-  server.get<{Querystring: {name: string}; Reply: IReply<{}>}>('/', {}, async (request, reply) => {
+  server.get<{Params: {name: string}; Reply: IReply<{}>}>('/:name', {}, async (request, reply) => {
     try {
-      const {name} = request.query;
+      const {name} = request.params;
       const config = await findConfigByName(name);
 
       if (config === null || undefined) {
