@@ -22,7 +22,8 @@
       "@/*": ["./*"],
       "@routes/*": ["routes/*"],
       "@controllers/*": ["controllers/*"],
-      "@services/*": ["services/*"]
+      "@services/*": ["services/*"],
+      "@plugins/*": ["plugins/*"]
     }
   },
   "include": ["src/**/*.ts"],
