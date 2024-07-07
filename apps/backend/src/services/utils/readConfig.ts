@@ -4,7 +4,7 @@ import path from 'path';
 
 export async function readConfig() {
   try {
-    const fileContent = await readFile(path.join(process.cwd(), 'config.json'));
+    const fileContent = await readFile(path.join(process.cwd(), '../../config.json'));
     if (!fileContent) {
       console.error('No config file provided');
       return null;
