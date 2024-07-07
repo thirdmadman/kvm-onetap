@@ -4,6 +4,7 @@
   "description": "Full-stack application for KVM lounch optimization.",
   "type": "module",
   "main": "./src/index.js",
+  "packageManager": "npm@9.1.3",
   "scripts": {
     "start": "node ./src/index.js"
   },
@@ -20,5 +21,11 @@
   "bugs": {
     "url": "https://github.com/thirdmadman/kvm-onetap/issues"
   },
-  "homepage": "https://github.com/thirdmadman/kvm-onetap#readme"
+  "homepage": "https://github.com/thirdmadman/kvm-onetap#readme",
+  "devDependencies": {
+    "turbo": "^2.0.6"
+  },
+  "workspaces": [
+    "apps/*"
+  ]
 }

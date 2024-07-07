@@ -131,3 +131,6 @@ dist
 
 tmp
 config.json
+.turbo
+
+app/fronted/build/
