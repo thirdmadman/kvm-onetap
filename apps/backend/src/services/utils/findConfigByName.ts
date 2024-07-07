@@ -1,4 +1,3 @@
-import { IConfig } from '@/types/interfaces/IConfig';
 import {readConfig} from './readConfig';
 
 export async function findConfigByName(name: string) {

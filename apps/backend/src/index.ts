@@ -1,5 +1,4 @@
 import {fastifyEnv} from '@fastify/env';
-import 'module-alias/register';
 import {fastify, FastifyServerOptions} from 'fastify';
 import {rootRoutes} from '@routes/root';
 import cors from '@fastify/cors';
@@ -23,7 +22,6 @@ const startServer = async (opts?: FastifyServerOptions) => {
     });
 
     server.register(rootRoutes, {prefix: envs.API_PREFIX});
-
 
     (async () => {
       try {
