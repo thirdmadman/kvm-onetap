@@ -3,21 +3,26 @@
     "require": ["tsconfig-paths/register"]
   },
   "compilerOptions": {
-    "lib": ["es2020"],
+    "lib": ["ESNext"],
     "module": "commonjs",
-    "target": "es2020",
+    "target": "es2017",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "incremental": true,
-    "noImplicitAny": false,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "noImplicitAny": true,
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "build",
     "baseUrl": "./src",
+    "strict": true,
     "paths": {
-      "@routes/*": ["src/routes/*"],
-      "@controllers/*": ["src/controllers/*"],
-      "@services/*": ["src/services/*"]
+      "@/*": ["./*"],
+      "@routes/*": ["routes/*"],
+      "@controllers/*": ["controllers/*"],
+      "@services/*": ["services/*"]
     }
   },
   "include": ["src/**/*.ts"],

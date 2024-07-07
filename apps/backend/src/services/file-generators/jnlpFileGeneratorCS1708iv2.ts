@@ -1,15 +1,16 @@
-import {createDirectory} from '../utils/createDirectory.js';
-import {writeStringToFile} from '../utils/writeStringToFile.js';
+import { IKvmConfig } from '@/types/interfaces/IConfig';
+import {createDirectory} from '../utils/createDirectory';
+import {writeStringToFile} from '../utils/writeStringToFile';
 import path from 'path';
 
-const getUrlId = async (domain, isHttps) => {
+const getUrlId = async (domain: string, isHttps: boolean) => {
   const url = `http${isHttps && 's'}://${domain}/`;
 
-  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
   try {
     const response = await fetch(url, {redirect: 'manual'});
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1';
 
     const body = await response.text();
 
@@ -26,19 +27,19 @@ const getUrlId = async (domain, isHttps) => {
 
     return urlId;
   } catch (e) {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1';
     console.error(e);
     return null;
   }
 };
 
-const getTargetId = async (domain, isHttps, urlId) => {
+const getTargetId = async (domain: string, isHttps: boolean, urlId: string) => {
   const url = `http${isHttps && 's'}://${domain}/${urlId}`;
-  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
   try {
     const response = await fetch(url, {redirect: 'manual'});
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1';
 
     const body = await response.text();
 
@@ -55,14 +56,28 @@ const getTargetId = async (domain, isHttps, urlId) => {
 
     return targetId;
   } catch (e) {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1';
     console.error(e);
     return null;
   }
 };
 
-const getAuthCookie = async ({domain, isHttps, username, password, targetId, urlId}) => {
-  const convert = (strSource) => {
+const getAuthCookie = async ({
+  domain,
+  isHttps,
+  username,
+  password,
+  targetId,
+  urlId,
+}: {
+  domain: string;
+  isHttps: boolean;
+  username: string;
+  password: string;
+  targetId: string;
+  urlId: string;
+}) => {
+  const convert = (strSource: string) => {
     let strTarget = new String();
     for (let i = 0; i < strSource.length; i++) {
       if (strSource.charAt(i) == '-') {
@@ -90,25 +105,18 @@ const getAuthCookie = async ({domain, isHttps, username, password, targetId, url
     return strTarget;
   };
 
-  const loginString =
-    convert(username) +
-    ' ' +
-    convert(password) +
-    ' ' +
-    convert(domain) +
-    ' ' +
-    convert(targetId);
+  const loginString = convert(username) + ' ' + convert(password) + ' ' + convert(domain) + ' ' + convert(targetId);
 
   const authData = {
-    KVMIP_GMTIME: Date.now() / 1000,
-    KVMIP_DIFFTIME: -(new Date()).getTimezoneOffset(),
+    KVMIP_GMTIME: String(Date.now() / 1000),
+    KVMIP_DIFFTIME: String(-new Date().getTimezoneOffset()),
     KVMIP_LOGIN: loginString,
     KVMIP_TARGETID: targetId,
   };
 
   const url = `http${isHttps && 's'}://${domain}/${urlId}`;
 
-  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
   try {
     const response = await fetch(url, {
@@ -122,7 +130,7 @@ const getAuthCookie = async ({domain, isHttps, username, password, targetId, url
       body: new URLSearchParams(authData),
       redirect: 'manual',
     });
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1';
 
     const cookie = response.headers.get('set-cookie');
 
@@ -136,25 +144,25 @@ const getAuthCookie = async ({domain, isHttps, username, password, targetId, url
 
     return cookie;
   } catch (e) {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1';
     console.error(e);
     return null;
   }
 };
 
-const updateInquery = async (domain, isHttps, authCookie) => {
+const updateInquery = async (domain: string, isHttps: boolean, authCookie: string) => {
   const sessionId = authCookie.split(' domain')[0].replace('sid=', '');
 
   const data = {
-    '/Inquery?update': 31, // unknown
-    'com_common': '0108', // port
-    xid: Math.random(), // unknown
+    '/Inquery?update': '31', // unknown
+    com_common: '0108', // port
+    xid: Math.random().toString(), // unknown
     SID: sessionId,
   };
 
   const url = `http${isHttps && 's'}://${domain}/Inquery`;
 
-  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
   try {
     const response = await fetch(url, {
@@ -164,39 +172,58 @@ const updateInquery = async (domain, isHttps, authCookie) => {
         Accept:
           'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'Accept-Encoding': 'gzip, deflate, br, zstd',
-        'Cookie': authCookie,
+        Cookie: authCookie,
       },
       body: new URLSearchParams(data),
       redirect: 'manual',
     });
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1';
     return response.text();
   } catch (e) {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1';
     console.error(e);
     return null;
   }
 };
 
-const getFileString = async ({domain, isHttps, username, password}) => {
+const getFileString = async ({
+  domain,
+  isHttps,
+  username,
+  password,
+}: {
+  domain: string;
+  isHttps: boolean;
+  username: string;
+  password: string;
+}) => {
   const urlId = await getUrlId(domain, isHttps);
+  if (!urlId) {
+    return null;
+  }
   const targetId = await getTargetId(domain, isHttps, urlId);
+  if (!targetId) {
+    return null;
+  }
   const authCookie = await getAuthCookie({domain, isHttps, username, password, targetId, urlId});
+  if (!authCookie) {
+    return null;
+  }
   updateInquery(domain, isHttps, authCookie);
 
   const url = `http${isHttps && 's'}://${domain}/Inquery.jnlp`;
 
-  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
   try {
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        'Cookie': authCookie,
-        'Referer': `http${isHttps && 's'}://${domain}/${urlId}`,
+        Cookie: authCookie,
+        Referer: `http${isHttps && 's'}://${domain}/${urlId}`,
       },
     });
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1';
 
     const text = await response.text();
 
@@ -206,13 +233,13 @@ const getFileString = async ({domain, isHttps, username, password}) => {
 
     return text;
   } catch (e) {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1';
     console.error(e);
     return null;
   }
 };
 
-export async function jnlpFileGeneratorCS1708iv2(kvmConfig) {
+export async function jnlpFileGeneratorCS1708iv2(kvmConfig: IKvmConfig) {
   if (!kvmConfig) {
     return null;
   }
@@ -220,7 +247,13 @@ export async function jnlpFileGeneratorCS1708iv2(kvmConfig) {
   let fileContent = '';
 
   try {
-    fileContent = await getFileString(kvmConfig);
+    const resultSting = await getFileString(kvmConfig);
+
+    if (!resultSting) {
+      return null;
+    }
+
+    fileContent = resultSting;
   } catch (e) {
     console.error(e);
     return;

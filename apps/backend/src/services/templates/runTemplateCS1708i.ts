@@ -1,5 +1,13 @@
-export const runTemplateCS1708i = (domain, isHttps, port, key, appPort, modelSecret, jarFilePath) =>
-`<?xml version="1.0" encoding="UTF-8"?>
+export const runTemplateCS1708i = (
+  domain: string,
+  isHttps: boolean,
+  port: string,
+  key: string,
+  appPort: string,
+  modelSecret: string,
+  jarFilePath: string
+) =>
+  `<?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.0+" codebase="http${isHttps && 's'}://${domain}:${port}">
   <information>
     <title>JavaClient</title>

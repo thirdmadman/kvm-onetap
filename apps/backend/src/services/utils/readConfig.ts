@@ -1,4 +1,5 @@
-import {readFile} from './readFile.js';
+import { IConfig } from '@/types/interfaces/IConfig';
+import {readFile} from '@services/utils/readFile';
 import path from 'path';
 
 export async function readConfig() {
@@ -9,14 +10,14 @@ export async function readConfig() {
       return null;
     }
 
-    const configObject = await JSON.parse(fileContent);
+    const configObject = await JSON.parse(fileContent as string);
 
     if (!configObject || !configObject.kvmList || configObject.kvmList.length === 0) {
       console.error('No KVMs provided in config file or file empty.');
       return null;
     }
 
-    return configObject;
+    return configObject as IConfig;
   } catch (e) {
     console.error(e);
     return null;

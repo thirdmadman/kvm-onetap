@@ -1,7 +1,8 @@
 
-import {getTemplateByType} from '../templates/getTemplateByType.js';
-import {createDirectory} from '../utils/createDirectory.js';
-import {writeStringToFile} from '../utils/writeStringToFile.js';
+import { IConfig, IKvmConfig } from '@/types/interfaces/IConfig';
+import {getTemplateByType} from '../templates/getTemplateByType';
+import {createDirectory} from '../utils/createDirectory';
+import {writeStringToFile} from '../utils/writeStringToFile';
 import path from 'path';
 
 const getFormattedCurrentTimestamp = () => {
@@ -9,7 +10,7 @@ const getFormattedCurrentTimestamp = () => {
   return `${now.getFullYear()}.${now.getMonth()}.${now.getDate()}.${now.getHours()}.${now.getMinutes()}.${now.getSeconds()}`;
 };
 
-const getApiKey = async ({domain, isHttps, username, password}) => {
+const getApiKey = async ({domain, isHttps, username, password}: {domain: string, isHttps: boolean, username: string, password: string}) => {
   const authData = {
     page_id: 'applet.htm',
     username,
@@ -20,7 +21,7 @@ const getApiKey = async ({domain, isHttps, username, password}) => {
 
   const url = `http${isHttps && 's'}://${domain}/view.htm`;
 
-  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = "0";
   
   try {
     const response = await fetch(url, {
@@ -34,7 +35,7 @@ const getApiKey = async ({domain, isHttps, username, password}) => {
       body: new URLSearchParams(authData),
       redirect: 'manual'
     });
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = "1";
     
     const location = response.headers.get('Location');
 
@@ -49,23 +50,28 @@ const getApiKey = async ({domain, isHttps, username, password}) => {
 
     return apiKey;
   } catch (e) {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = "1";
     console.error(e);
     return null;
   }
 }
 
-export async function jnlpFileGeneratorCS1708i(kvmConfig) {
+export async function jnlpFileGeneratorCS1708i(kvmConfig: IKvmConfig) {
   if (!kvmConfig) {
     return null;
   }
 
   let fileContent = '';
 
+  const {domain, isHttps, username, password} = kvmConfig
+
   try {
     const apiKey = await getApiKey(kvmConfig);
+    if (!apiKey) {
+      return null;
+    }
     const template = getTemplateByType(kvmConfig.type);
-    fileContent = template(kvmConfig.domain, kvmConfig.isHttps, kvmConfig.port, apiKey, kvmConfig.appPort, kvmConfig.modelSecret, kvmConfig.jarFilePath);
+    fileContent = template(kvmConfig.domain, kvmConfig.isHttps, String(kvmConfig.port), apiKey, String(kvmConfig.appPort), kvmConfig.modelSecret, kvmConfig.jarFilePath);
   } catch (e) {
     console.error(e);
     return;
