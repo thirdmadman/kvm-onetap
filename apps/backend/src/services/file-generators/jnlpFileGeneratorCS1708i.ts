@@ -78,7 +78,7 @@ export async function jnlpFileGeneratorCS1708i(kvmConfig: IKvmConfig) {
   }
 
   try {
-    const fileName = `${kvmConfig.name}.jnlp`;
+    const fileName = `${kvmConfig.name}_${Date.now()}.jnlp`;
     const pathToFile = path.join(process.cwd(), `./tmp/${fileName}`);
     await createDirectory(path.join(process.cwd(), `./tmp/`));
     await writeStringToFile(pathToFile, fileContent);

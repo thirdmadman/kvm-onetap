@@ -201,14 +201,17 @@ const getFileString = async ({
   if (!urlId) {
     return null;
   }
+
   const targetId = await getTargetId(domain, isHttps, urlId);
   if (!targetId) {
     return null;
   }
+
   const authCookie = await getAuthCookie({domain, isHttps, username, password, targetId, urlId});
   if (!authCookie) {
     return null;
   }
+
   updateInquery(domain, isHttps, authCookie);
 
   const url = `http${isHttps && 's'}://${domain}/Inquery.jnlp`;
@@ -260,7 +263,7 @@ export async function jnlpFileGeneratorCS1708iv2(kvmConfig: IKvmConfig) {
   }
 
   try {
-    const fileName = `${kvmConfig.name}.jnlp`;
+    const fileName = `${kvmConfig.name}_${Date.now()}.jnlp`;
     const pathToFile = path.join(process.cwd(), `./tmp/${fileName}`);
     await createDirectory(path.join(process.cwd(), `./tmp/`));
     await writeStringToFile(pathToFile, fileContent);
