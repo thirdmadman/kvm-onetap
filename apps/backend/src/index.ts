@@ -1,6 +1,7 @@
 import 'module-alias/register';
 import {fastify, FastifyServerOptions} from 'fastify';
-import { rootRoutes } from '@routes/root';
+import {rootRoutes} from '@routes/root';
+import cors from '@fastify/cors';
 
 const port = parseInt(process.env.API_PORT || '0', 10) || 5000;
 
@@ -11,12 +12,13 @@ const startServer = async (opts?: FastifyServerOptions) => {
     };
 
     const server = fastify({...defaultOptions, ...opts});
+    await server.register(cors, {});
 
-    server.get("/healthcheck", async function () {
-      return { status: "OK" };
+    server.get('/healthcheck', async function () {
+      return {status: 'OK'};
     });
 
-    server.register(rootRoutes, { prefix: "api" });
+    server.register(rootRoutes, {prefix: 'api'});
 
     await server.listen({port});
   } catch (e) {
