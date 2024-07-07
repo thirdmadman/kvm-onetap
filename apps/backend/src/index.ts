@@ -1,9 +1,9 @@
+import {fastifyEnv} from '@fastify/env';
 import 'module-alias/register';
 import {fastify, FastifyServerOptions} from 'fastify';
 import {rootRoutes} from '@routes/root';
 import cors from '@fastify/cors';
-
-const port = parseInt(process.env.API_PORT || '0', 10) || 5000;
+import {configOptions, IEnvs} from './plugins/env';
 
 const startServer = async (opts?: FastifyServerOptions) => {
   try {
@@ -12,15 +12,28 @@ const startServer = async (opts?: FastifyServerOptions) => {
     };
 
     const server = fastify({...defaultOptions, ...opts});
-    await server.register(cors, {});
+    server.register(cors, {});
+    server.register(fastifyEnv, configOptions);
+    await server.after();
+
+    const envs = server.getEnvs<IEnvs>();
 
     server.get('/healthcheck', async function () {
       return {status: 'OK'};
     });
 
-    server.register(rootRoutes, {prefix: 'api'});
+    server.register(rootRoutes, {prefix: envs.API_PREFIX});
 
-    await server.listen({port});
+
+    (async () => {
+      try {
+        await server.ready();
+        await server.listen({port: envs.API_PORT});
+      } catch (error) {
+        server.log.error(error);
+        process.exit(1);
+      }
+    })();
   } catch (e) {
     console.error(e);
   }
