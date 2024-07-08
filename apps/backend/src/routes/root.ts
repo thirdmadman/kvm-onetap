@@ -52,7 +52,7 @@ export async function rootRoutes(server: FastifyInstance) {
       if (!filename) {
         return reply.code(404).send({error: 'JNPL file not generated'});
       } else {
-        await runJnlpFile(filename);
+        runJnlpFile(filename);
         return reply.code(200).send({
           success: true,
         });
