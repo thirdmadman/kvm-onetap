@@ -202,17 +202,23 @@ const getFileString = async ({
     return null;
   }
 
+  console.error(urlId);
+
   const targetId = await getTargetId(domain, isHttps, urlId);
   if (!targetId) {
     return null;
   }
+
+  console.error(targetId);
 
   const authCookie = await getAuthCookie({domain, isHttps, username, password, targetId, urlId});
   if (!authCookie) {
     return null;
   }
 
-  updateInquery(domain, isHttps, authCookie);
+  console.error(authCookie);
+
+  await updateInquery(domain, isHttps, authCookie);
 
   const url = `http${isHttps && 's'}://${domain}/Inquery.jnlp`;
 
