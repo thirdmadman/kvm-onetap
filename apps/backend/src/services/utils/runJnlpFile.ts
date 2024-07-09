@@ -1,16 +1,8 @@
-import {exec} from 'child_process';
+import { promisify } from "util";
+import { exec } from "child_process";
 
-export const runJnlpFile = (jnlpFile: string) => {
-  exec(`javaws -Xnosplash ${jnlpFile}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`error: ${error.message}`);
-      return;
-    }
+const execPromise = promisify(exec);
 
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-      return;
-    }
-    return;
-  });
+export const runJnlpFile = async (jnlpFile: string) => {
+  await execPromise(`"C:\\Program Files\\Java\\jre1.8.0_321\\bin\\javaws.exe" "${jnlpFile}"`);
 };
