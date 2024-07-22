@@ -3,7 +3,9 @@ import {IReply} from '@/types/interfaces/fastify';
 import {findConfigByName} from '@/services/utils/findConfigByName';
 import {runJnlpFile} from '@/services/utils/runJnlpFile';
 import {generateJnlpFile} from '@/services/file-generators/generateJnlpFile';
-import { readConfig } from '@/services/utils/readConfig';
+import {readConfig} from '@/services/utils/readConfig';
+import {createReadStream, ReadStream} from 'node:fs';
+import { resolve } from 'node:path';
 
 export async function rootRoutes(server: FastifyInstance) {
   server.get('/status', {}, async (request, reply) => {
@@ -19,7 +21,7 @@ export async function rootRoutes(server: FastifyInstance) {
       const config = await readConfig();
 
       if (config === null || undefined) {
-        return reply.code(404).send({error: 'Config file not found'});;
+        return reply.code(404).send({error: 'Config file not found'});
       }
 
       const names = config.kvmList.map((kvmConfig) => kvmConfig.name);
@@ -30,33 +32,47 @@ export async function rootRoutes(server: FastifyInstance) {
         return reply.code(200).send({
           success: true,
           data: {
-            names
-          }
+            names,
+          },
         });
       }
     } catch (error) {
       return reply.code(400).send({error: error as string});
     }
   });
-  server.get<{Params: {name: string}; Reply: IReply<{}>}>('/:name', {}, async (request, reply) => {
+  server.get<{
+    Querystring: {
+      download: string | undefined;
+    };
+    Params: {name: string};
+    Reply: IReply<{}> | ReadStream;
+  }>('/:name', {}, async (request, reply) => {
     try {
       const {name} = request.params;
       const config = await findConfigByName(name);
 
       if (config === null || undefined) {
-        return reply.code(404).send({error: 'JNPL file not generated'});;
+        return reply.code(404).send({error: 'JNPL file not generated'});
       }
 
       const filename = await generateJnlpFile(name);
 
+      const {download} = request.query;
+
       if (!filename) {
         return reply.code(404).send({error: 'JNPL file not generated'});
-      } else {
-        runJnlpFile(filename);
-        return reply.code(200).send({
-          success: true,
-        });
       }
+
+      if (download && download === 'true') {
+        const stream = createReadStream(resolve(filename))
+        return reply.type('application/x-java-jnlp-file').send(stream);
+      }
+
+      runJnlpFile(filename);
+      return reply.code(200).send({
+        success: true,
+      });
+
     } catch (error) {
       return reply.code(400).send({error: error as string});
     }
