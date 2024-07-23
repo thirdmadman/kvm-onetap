@@ -2,11 +2,13 @@ import {readConfig} from '../utils/readConfig';
 import {jnlpFileGeneratorCS1708i} from './jnlpFileGeneratorCS1708i';
 import {jnlpFileGeneratorCS1708iv2} from './jnlpFileGeneratorCS1708iv2';
 import {jnlpFileGeneratorCN8000A} from './jnlpFileGeneratorCN8000A';
+import {jnlpFileGeneratorCN8000} from './jnlpFileGeneratorCN8000';
 
 const TYPE_TO_GENERATOR_MAP = [
   {type: 'CS1708i', func: jnlpFileGeneratorCS1708i},
   {type: 'CS1708iv2', func: jnlpFileGeneratorCS1708iv2},
-  {type: 'CN8000A', func: jnlpFileGeneratorCN8000A}
+  {type: 'CN8000A', func: jnlpFileGeneratorCN8000A},
+  {type: 'CN8000', func: jnlpFileGeneratorCN8000},
 ];
 
 export async function generateJnlpFile(name: string) {
