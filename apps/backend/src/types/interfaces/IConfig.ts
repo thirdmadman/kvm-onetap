@@ -1,3 +1,8 @@
+export interface IKvmGroup {
+  id: number;
+  name: string;
+}
+
 export interface IKvmConfig {
   name: string;
   title: string;
@@ -13,5 +18,6 @@ export interface IKvmConfig {
 }
 
 export interface IConfig {
+  kvmGroups: Array<IKvmGroup>;
   kvmList: Array<IKvmConfig>;
 }
