@@ -6,6 +6,7 @@ import {generateJnlpFile} from '@/services/file-generators/generateJnlpFile';
 import {readConfig} from '@/services/utils/readConfig';
 import {createReadStream, ReadStream} from 'node:fs';
 import { resolve } from 'node:path';
+import { IKvmGroup } from '@/types/interfaces/IConfig';
 
 export async function rootRoutes(server: FastifyInstance) {
   server.get('/status', {}, async (request, reply) => {
@@ -16,7 +17,7 @@ export async function rootRoutes(server: FastifyInstance) {
       return reply.send(500);
     }
   });
-  server.get<{Reply: IReply<{names: Array<string>}>}>('/', {}, async (request, reply) => {
+  server.get<{Reply: IReply<{names: Array<{name: string; groupId: number}>; groups: Array<IKvmGroup>}>}>('/', {}, async (request, reply) => {
     try {
       const config = await readConfig();
 
@@ -24,15 +25,18 @@ export async function rootRoutes(server: FastifyInstance) {
         return reply.code(404).send({error: 'Config file not found'});
       }
 
-      const names = config.kvmList.map((kvmConfig) => kvmConfig.name);
+      const namesArray = config.kvmList.map((kvmConfig) => ({name: kvmConfig.name, groupId: kvmConfig.groupId}));
 
-      if (!names || names.length <= 0) {
+      const groups = config.kvmGroups;
+
+      if (!namesArray || namesArray.length <= 0) {
         return reply.code(404).send({error: 'Config list empty'});
       } else {
         return reply.code(200).send({
           success: true,
           data: {
-            names,
+            names: namesArray,
+            groups
           },
         });
       }

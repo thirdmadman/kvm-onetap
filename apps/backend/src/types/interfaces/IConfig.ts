@@ -4,6 +4,7 @@ export interface IKvmGroup {
 }
 
 export interface IKvmConfig {
+  groupId: number;
   name: string;
   title: string;
   type: string;
