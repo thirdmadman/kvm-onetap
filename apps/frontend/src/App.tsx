@@ -1,13 +1,23 @@
 import {useEffect, useState} from 'react';
 import {Layout} from './Layout';
 
+interface IKvmGroup {
+  id: number;
+  name: string;
+}
+
+interface IKvmName {
+  name: string;
+  groupId: number;
+}
+
 const API_URL = `http://127.0.0.1:${import.meta.env.VITE_API_PORT}/${import.meta.env.VITE_API_PREFIX}`;
 
 const launchKvmByName = async (name: string) => {
   fetch(`${API_URL}/${name}`);
 };
 
-const generateLinks = (array: string[]) =>
+const generateLinksFromNames = (array: string[]) =>
   array.map((el) => (
     <a
       className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800'
@@ -20,7 +30,24 @@ const generateLinks = (array: string[]) =>
     </a>
   ));
 
-const generateButtons = (array: string[]) =>
+const generateLinks = (groups: Array<IKvmGroup> | null, names: Array<IKvmName>) => {
+  if (!groups || groups.length <= 0) {
+    return generateLinksFromNames(names.map((el) => el.name));
+  }
+
+  return groups.map((group) => {
+    const filteredNames = names.filter((name) => name.groupId === group.id).map((el) => el.name);
+
+    return (
+      <div className='p-4 px-6 rounded-xl border w-full'>
+        <h2 className='pb-8 text-4xl font-bold dark:text-white'>{group.name}</h2>
+        <div className='flex gap-3 flex-wrap'>{generateLinksFromNames(filteredNames)}</div>
+      </div>
+    );
+  });
+};
+
+const generateButtonsFromNames = (array: string[]) =>
   array.map((el) => (
     <button
       className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800'
@@ -31,8 +58,27 @@ const generateButtons = (array: string[]) =>
     </button>
   ));
 
+const generateButtons = (groups: Array<IKvmGroup> | null, names: Array<IKvmName>) => {
+  if (!groups || groups.length <= 0) {
+    return generateButtonsFromNames(names.map((el) => el.name));
+  }
+
+  return groups.map((group) => {
+    const filteredNames = names.filter((name) => name.groupId === group.id).map((el) => el.name);
+
+    return (
+      <div className='p-4 px-6 rounded-xl border w-full'>
+        <h2 className='pb-8 text-4xl font-bold dark:text-white'>{group.name}</h2>
+        <div className='flex gap-3 flex-wrap'>{generateButtonsFromNames(filteredNames)}</div>
+      </div>
+    );
+  });
+};
+
 function App() {
-  const [names, setNames] = useState<null | string[]>(null);
+  const [names, setNames] = useState<null | Array<IKvmName>>(null);
+  const [groups, setGroups] = useState<null | Array<IKvmGroup>>(null);
+
   const searchParams = new URLSearchParams(window.location.search);
 
   useEffect(() => {
@@ -42,8 +88,9 @@ function App() {
       if (!responseJson) {
         return null;
       }
-      const {names} = responseJson.data;
+      const {names, groups} = responseJson.data;
       setNames(names);
+      setGroups(groups);
     };
 
     getNames();
@@ -59,8 +106,8 @@ function App() {
     return (
       <Layout>
         <div className='container max-w-screen-xl mx-auto py-24 px-6 sm:px-8 md:px-12 lg:px-24 xl:px-32 xl:py-32'>
-          <h1 className='text-2xl mb-8 font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight'>Choose kvm to launch</h1>
-          <div className='flex gap-3 flex-wrap'>{generateButtons(names)}</div>
+          <h1 className='pb-8 text-5xl font-extrabold dark:text-white'>Choose kvm to launch</h1>
+          <div className='flex gap-3 flex-wrap'>{generateButtons(groups, names)}</div>
         </div>
       </Layout>
     );
@@ -69,8 +116,8 @@ function App() {
   return (
     <Layout>
       <div className='container max-w-screen-xl mx-auto py-24 px-6 sm:px-8 md:px-12 lg:px-24 xl:px-32 xl:py-32'>
-        <h1 className='text-2xl mb-8 font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight'>Choose kvm to download .jnlp</h1>
-        <div className='flex gap-3 flex-wrap'>{generateLinks(names)}</div>
+        <h1 className='pb-8 text-5xl font-extrabold dark:text-white'>Choose kvm to download .jnlp</h1>
+        <div className='flex flex-col gap-8'>{generateLinks(groups, names)}</div>
       </div>
     </Layout>
   );
